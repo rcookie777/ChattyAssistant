@@ -1,0 +1,4 @@
+imessage_reader
+python-dotenv
+sqlite3
+openai
