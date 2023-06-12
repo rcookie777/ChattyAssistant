@@ -158,27 +158,24 @@ def get_prompt(message_history):
     :message_history: The message history of the recipient
     :return: A string prompt to send to the model
     '''
-    # Get the last 5 keys (dates) from the message history dictionary
     last_5_dates = list(message_history.keys())[-10:]
-    # Retrieve the corresponding messages for the last 5 dates
     last_5_messages = []
     for date in last_5_dates:
         sender = message_history[date]['from']
         message = message_history[date]['message']
         last_5_messages.append(f"{sender}: {message}")
-    # Concatenate the messages into a single string prompt
     prompt = " ".join(last_5_messages)
     return prompt
 
 def generate_message(prompt,chat_log=None):
     '''
     Generates a message based on the prompt
+    :prompt: The list of messages to be passed
+    :chat_log: Chat log if valid
     '''
     if chat_log is None:
         chat_log = init_chat_log
-    # Generate response
     chat_log = chat_log + [{'role': 'user', 'content': prompt}]
-    # print("Sending Chat Log:", chat_log)
     response = completion.create(model='gpt-3.5-turbo', messages=chat_log)
     answer = response.choices[0]['message']['content']
     chat_log = chat_log + [{'role': 'assistant', 'content': answer}]
@@ -200,12 +197,9 @@ def format_phone_number(phone_number):
     :phone_number: The phone number to format
     :return: The formatted phone number
     '''
-    # Remove all non-digit characters from the phone number
     digits = ''.join(filter(str.isdigit, phone_number))
-    # Add the country code if missing
     if len(digits) == 10:
         digits = '1' + digits
-    # Add the "+" sign and format the phone number
     formatted_number = '+{}{}{}{}'.format(digits[:2], digits[2:5], digits[5:8], digits[8:])
     
     return formatted_number[0:12]
@@ -219,11 +213,12 @@ def get_valid_phone_number(phone_number):
     formatted_number = format_phone_number(phone_number)
     if len(formatted_number) == 12:
         return formatted_number
-    return None  # Return None if no valid number found
+    return None 
 
 def main(recipient):
     '''
-    Main function
+    Main function that runs prompt gen and response 
+    :recipient: The phone number to chat with
     '''
     message_history = get_history(recipient)
     prompt = get_prompt(message_history)
@@ -232,13 +227,9 @@ def main(recipient):
     if response.startswith("Me: "):
         response = response[4:]
     print(response)
-    # send_message(recipient, [response])
 
 if __name__ == "__main__":
-    # recipient = sys.argv[1]
-    # print(recipient)
-    # Check if the phone number is valid
-    recipient = "+12134449463"
+    recipient = sys.argv[1]
     phone_number = get_valid_phone_number(recipient)
     if phone_number is None:
         print("Invalid phone number",recipient)
